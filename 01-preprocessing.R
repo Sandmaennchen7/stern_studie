@@ -29,6 +29,17 @@ raw_data1 <- read.csv("raw_data/Rep01_anonymized.csv")
     #exclude participants who did not write anything in the humility writing exercise
   #“AP2 
 
+###viewdata========
+table(raw_demo$SelectOut)
+View(raw_demo)
+view(dfSummary(raw_demo))
+
+view(raw_data1)
+View(dfSummary(raw_data1))
+raw_data1 %>%
+  select(writing_assignment) %>%
+  View()
+
 ###preprocessing=======================
 
 dat <- raw_data1 %>%
@@ -36,7 +47,8 @@ dat <- raw_data1 %>%
     # classification column
     SelectOut = case_when(
       # Condition for Category 2: Number.Strengths is exactly 0
-      Number.Strengths == 0 ~ 2,
+      Number.Strengths = 0 ~ 2,
+      ##insert exclusion of zombie rows
       
       # Condition for Category 1: Outlier in either Strengths OR Weaknesses (> 3 SD)
       abs(Number.Strengths - mean(Number.Strengths, na.rm = TRUE)) > (3 * sd(Number.Strengths, na.rm = TRUE)) | 
@@ -55,13 +67,17 @@ export(dat, file="processed_data/data.csv") #save data in file
 
 
 
-###viewdata==
+###viewdata again ========
 table(raw_demo$SelectOut)
 View(raw_demo)
 view(dfSummary(raw_demo))
 
 View(dat)
-view(dfSummary(dat)) ##was genau ist das? ~Chiara
+view(dfSummary(dat)) 
+
+View(demo)
+view(dfSummary(demo)) 
+
 
 view(raw_data1)
 View(dfSummary(raw_data1))
@@ -80,10 +96,10 @@ names(raw_data1)
 raw_data1 %>% count(conscientious)
 raw_data1 %>% count(video_problems)
 raw_data1 %>% count(video_played)
-raw_data1 %>% count(sound_on)
+raw_data1 %>% count(sound_on)##counting the responses
 
 ###AP1 exclude participants who answered no to the question if the video played
-raw_data1 %>%
+datraw_data1 %>%
   filter(video_played == 1)
 
 ###AP1 exclude participants who answered no to the question if tone worked 
