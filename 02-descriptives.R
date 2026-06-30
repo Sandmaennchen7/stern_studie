@@ -1,5 +1,12 @@
-##== descriptives of cleaned dataset
-# states elicited by different conditions
+##== descriptives of cleaned dataset=========================================
+##here it would be sensible to think about sorting exp_new and old together in one exp
+
+
+#define variables
+
+screen <- dat$screen_width * dat$screen_height
+
+  # states elicited by different conditions
 dat %>%
   group_by(condition) %>%
     summarise(mean_awe = mean(awe, na.rm = TRUE),

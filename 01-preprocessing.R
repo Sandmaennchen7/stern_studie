@@ -5,6 +5,7 @@ library(summarytools)
 library (dplyr)
 library(ggplot2)
 library(rio)
+library(multcomp)
 
 
 ##read in data ========================
@@ -64,7 +65,7 @@ dat <- raw_data1 %>%
       
       # CATEGORY 3: Technical difficulties & lack of conscientiousness ---
       video_played == 0   ~ 3,
-      sound_on == 0       ~ 3,
+      sound_on == 0       ~ 3,##do we take those out?
       conscientious != 1  ~ 3,
       
       # CATEGORY 2: Missing text assignment or 0 strengths ---
