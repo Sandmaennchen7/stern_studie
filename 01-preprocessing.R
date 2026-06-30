@@ -11,7 +11,7 @@ library(rio)
 raw_demo <- read.csv("raw_data/Rep01_demographics_anonymized.csv")
 raw_data1 <- read.csv("raw_data/Rep01_anonymized.csv")
 
-
+###assignment==========================
 ##create dataset removing all of the  inclusion/exclusion rules of our preregistration. See sections:
   #M4 -> people age< 18 excluded
   #“M5 How will participant drop-out be handled?” -> exclusion
@@ -39,34 +39,59 @@ View(dfSummary(raw_data1))
 raw_data1 %>%
   select(writing_assignment) %>%
   View()
+nrow(raw_data1)
+###look at the responses of the conscientious question: no one answered no, so I excluded no data, but many missing values, PreReg says that we only exculde participants who anwered no
+names(raw_data1)
+raw_data1 %>% count(conscientious)
+raw_data1 %>% count(video_problems)
+raw_data1 %>% count(video_played)
+raw_data1 %>% count(sound_on)##counting the responses
 
-###preprocessing=======================
+
+### Preprocessing =============================================================
+
+# Pre-calculate the mean and SD for the outlier detection (Category 1)
+# Doing this upfront keeps the case_when function clean and readable
+mean_str <- mean(raw_data1$Number.Strengths, na.rm = TRUE)
+sd_str   = sd(raw_data1$Number.Strengths, na.rm = TRUE)
+mean_wk  <- mean(raw_data1$Number.Weaknesses, na.rm = TRUE)
+sd_wk    <- sd(raw_data1$Number.Weaknesses, na.rm = TRUE)
 
 dat <- raw_data1 %>%
   mutate(
-    # classification column
+    # Create the classification column
     SelectOut = case_when(
-      # Condition for Category 2: Number.Strengths is exactly 0
-      Number.Strengths = 0 ~ 2,
-      ##insert exclusion of zombie rows
       
-      # Condition for Category 1: Outlier in either Strengths OR Weaknesses (> 3 SD)
-      abs(Number.Strengths - mean(Number.Strengths, na.rm = TRUE)) > (3 * sd(Number.Strengths, na.rm = TRUE)) | 
-        abs(Number.Weaknesses - mean(Number.Weaknesses, na.rm = TRUE)) > (3 * sd(Number.Weaknesses, na.rm = TRUE)) ~ 1,
+      # CATEGORY 3: Technical difficulties & lack of conscientiousness ---
+      video_played == 0   ~ 3,
+      sound_on == 0       ~ 3,
+      conscientious != 1  ~ 3,
       
-      # Category 0: Everything else (Unproblematic)
+      # CATEGORY 2: Missing text assignment or 0 strengths ---
+      is.na(writing_assignment) | trimws(writing_assignment) == "" ~ 2,
+      #Number.Strengths == 0                                        ~ 2,
+      
+      # CATEGORY 1: Outliers (> 3 SD) in strengths OR weaknesses ---
+      #abs(Number.Strengths - mean_str) > (3 * sd_str) | 
+        #abs(Number.Weaknesses - mean_wk) > (3 * sd_wk)               ~ 1,
+      
+      # --- CATEGORY 0: Clean / Unproblematic data (Default) ---
       TRUE ~ 0
     )
   ) %>%
-  
-  # Filter
+  # Filter: Keep only the valid data
   filter(SelectOut == 0)
 
-# Export the processed data
-export(dat, file="processed_data/data.csv") #save data in file
+# Preview the cleaned data
+View(dat)
 
-
-
+  ## clean demographics dataset
+      ###M4 exclude participants under 18 
+      names(raw_demo)
+      demo <- raw_demo %>%
+        filter(age >= 18)
+      view(dfSummary(demo))
+      
 ###viewdata again ========
 table(raw_demo$SelectOut)
 View(raw_demo)
@@ -85,31 +110,7 @@ raw_data1 %>%
   select(writing_assignment) %>%
   View()
 
-###M4 exclude participants under 18 
-names(raw_demo)
-demo <- raw_demo %>%
-  filter(age >= 18)
-view(dfSummary(demo))
-
-###look at the responses of the conscientious question: no one answered no, so I excluded no data, but many missing values, PreReg says that we only exculde participants who anwered no
-names(raw_data1)
-raw_data1 %>% count(conscientious)
-raw_data1 %>% count(video_problems)
-raw_data1 %>% count(video_played)
-raw_data1 %>% count(sound_on)##counting the responses
-
-###AP1 exclude participants who answered no to the question if the video played
-datraw_data1 %>%
-  filter(video_played == 1)
-
-###AP1 exclude participants who answered no to the question if tone worked 
-raw_data1 %>%
-  filter(sound_on == 1)
-
-###AP1 exclude participants who didnt write anything to the writing assignment
-nrow(raw_data1)
-dat_clean <- raw_data1 %>%
-  filter(!is.na(writing_assignment),
-         trimws(writing_assignment) != "")
-nrow(dat_clean)
-view(dfSummary(dat_clean))
+### export  
+# Export the processed data
+export(dat, file="processed_data/data.csv") #save data in file
+export(demo, file="processed_data/demo.csv") #save data in file
