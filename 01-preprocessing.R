@@ -64,8 +64,10 @@ dat <- raw_data1 %>%
     SelectOut = case_when(
       
       # CATEGORY 3: Technical difficulties & lack of conscientiousness ---
-      video_played == 0   ~ 3,
-      sound_on == 0       ~ 3,##do we take those out?
+      # Only Participants that answered "Yes" (code = 1) to all screening questions are included
+      
+      video_played != 1   ~ 3,
+      sound_on != 1       ~ 3,
       conscientious != 1  ~ 3,
       
       # CATEGORY 2: Missing text assignment or 0 strengths ---
