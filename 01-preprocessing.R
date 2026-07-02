@@ -64,9 +64,9 @@ dat <- raw_data1 %>%
     SelectOut = case_when(
       
       # CATEGORY 3: Technical difficulties & lack of conscientiousness ---
-      video_played == 0   ~ 3,
-      sound_on == 0       ~ 3,##do we take those out?
-      conscientious != 1  ~ 3,
+      video_played == 2   ~ 3,
+      sound_on == 2       ~ 3,##do we take those out?
+      conscientious != 2  ~ 3,
       
       # CATEGORY 2: Missing text assignment or 0 strengths ---
       is.na(writing_assignment) | trimws(writing_assignment) == "" ~ 2,
